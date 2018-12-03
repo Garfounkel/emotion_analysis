@@ -39,41 +39,41 @@ def enrich_embedding_dictionnary(emb_dict):
     return emb_dict
 
 
-def get_embeddings_and_word_index(filepath, max_seq_len, vocab=None, dim=300):
+def get_embeddings_and_word_index(filepath, max_seq_len, vocab, dim=300):
     emb_mat_path = f'pickles/{os.path.basename(filepath)}.matrix.pickle'
     word_index_path = f'pickles/{os.path.basename(filepath)}.word_index.pickle'
+    unknown_words_path = 'pickles/unknown_words.pickle'
 
     if os.path.exists(emb_mat_path) and os.path.exists(word_index_path):
-        return pickle.load(open(emb_mat_path, 'rb')), pickle.load(open(word_index_path, 'rb'))
+        return pickle.load(open(emb_mat_path, 'rb')), pickle.load(open(word_index_path, 'rb')), pickle.load(open(unknown_words_path, 'rb'))
 
     emb_dict = get_embedding_dictionnary(filepath, dim)
     emb_dict = enrich_embedding_dictionnary(emb_dict)
 
-    word_number = len(emb_dict)
+    vocab.update(['<unk>', '<pad>'])
+    word_number = len(vocab)
 
     word_index = dict()
     emb_matrix = np.ndarray((word_number, dim), dtype='float32')
     
-    for i, (word, vec) in enumerate(emb_dict.items()):
-        word_index[word] = i
-        emb_matrix[i] = vec
-
-    i = word_number
-
+    i = 0
+    unknown_words = set()
     if vocab:
         for word in vocab:
-            if word not in word_index:
-                word_index[word] = i
-                emb_matrix = np.vstack([emb_matrix, emb_dict['<unk>']])
-                i += 1
-        print(f'Unknown words from the vocabulary: {i - word_number}')
+            word_index[word] = i
+            emb_matrix[i] = emb_dict.get(word, emb_dict['<unk>'])
+            i += 1
+            if word not in emb_dict:
+                unknown_words.add(word)
+        print(f'Unknown words from the vocabulary: {len(unknown_words)}')
 
     word_index['<max_seq_len>'] = max_seq_len
 
     pickle.dump(emb_matrix, open(emb_mat_path, 'wb'))
     pickle.dump(emb_dict, open(word_index_path, 'wb'))
+    pickle.dump(unknown_words, open(unknown_words_path, 'wb'))
 
-    return emb_matrix, word_index
+    return emb_matrix, word_index, unknown_words
 
 
 def sequences_to_index(sequences, word_index, max_len):
