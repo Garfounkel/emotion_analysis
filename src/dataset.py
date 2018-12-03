@@ -17,7 +17,7 @@ def load_dataset(filepath, has_labels=True):
         labels = tweet['label'].apply(lambda x: {'angry': 0, 'happy': 1, 'sad': 2}.get(x, 3))
         return text, labels
     else:
-        return text
+        return text, tweet
 
 
 def load_datasets_and_vocab_pipeline():
@@ -25,7 +25,7 @@ def load_datasets_and_vocab_pipeline():
     test_file = 'data/test.txt'
 
     X_train, y_train = load_dataset(train_file)
-    X_test = load_dataset(test_file, has_labels=False)
+    X_test, _ = load_dataset(test_file, has_labels=False)
 
     pipeline = Pipeline([('preprocess', PipelinePreprocessor())])
 
@@ -41,6 +41,13 @@ def load_datasets_and_vocab_pipeline():
             max_len = len(seq)
 
     return (X_train, y_train), X_test, (vocab, max_len)
+
+
+def load_submission_dataset(filepath):
+    X_test, df_test = load_dataset(filepath, has_labels=False)
+    pipeline = Pipeline([('preprocess', PipelinePreprocessor())])
+    X_test = pipeline.fit_transform(X_test)
+    return X_test, df_test
 
 
 def train_test_val_split(X, y, final=False):

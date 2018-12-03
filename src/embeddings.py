@@ -39,7 +39,7 @@ def enrich_embedding_dictionnary(emb_dict):
     return emb_dict
 
 
-def get_embeddings_and_word_index(filepath, vocab=None, dim=300):
+def get_embeddings_and_word_index(filepath, max_seq_len, vocab=None, dim=300):
     emb_mat_path = f'pickles/{os.path.basename(filepath)}.matrix.pickle'
     word_index_path = f'pickles/{os.path.basename(filepath)}.word_index.pickle'
 
@@ -67,6 +67,8 @@ def get_embeddings_and_word_index(filepath, vocab=None, dim=300):
                 emb_matrix = np.vstack([emb_matrix, emb_dict['<unk>']])
                 i += 1
         print(f'Unknown words from the vocabulary: {i - word_number}')
+
+    word_index['<max_seq_len>'] = max_seq_len
 
     pickle.dump(emb_matrix, open(emb_mat_path, 'wb'))
     pickle.dump(emb_dict, open(word_index_path, 'wb'))
