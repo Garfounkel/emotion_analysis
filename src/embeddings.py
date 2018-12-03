@@ -10,7 +10,7 @@ import itertools
 [X] Convert datastories.txt to embedding dictionnary and dump the resulting embedding
 [ ] Enrich the embedding dictionnary with external ressources (Emolex, OLE, Emoji Valence, Depeche Mood, ...)
 [X] Build the embedding matrix corresponding to our vocabulary using the embedding dictionnary
-[ ] Add the vocabulary to the call of get_embedding_and_word_index(...)
+[X] Add the vocabulary to the call of get_embedding_and_word_index(...)
 '''
 
 def get_embedding_dictionnary(filepath, dim=300):
@@ -68,6 +68,9 @@ def get_embeddings_and_word_index(filepath, vocab=None, dim=300):
                 i += 1
         print(f'Unknown words from the vocabulary: {i - word_number}')
 
+    pickle.dump(emb_matrix, open(emb_mat_path, 'wb'))
+    pickle.dump(emb_dict, open(word_index_path, 'wb'))
+
     return emb_matrix, word_index
 
 
@@ -78,4 +81,4 @@ def sequences_to_index(sequences, word_index, max_len):
             sequences[i][j] = index
         pad_len = max_len - len(seq)
         sequences[i] += list(itertools.repeat(word_index['<pad>'], pad_len))
-    return sequences
+    return np.array(sequences.tolist())
