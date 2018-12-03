@@ -6,3 +6,4 @@ gensim
 unidecode
 feather-format==0.4.0
 ekphrasis
+autocorrect
