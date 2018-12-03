@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pickle
 import itertools
+from collections import defaultdict
 
 
 '''
@@ -44,7 +45,7 @@ def get_embeddings_and_word_index(filepath, max_seq_len, vocab, dim=300):
     word_index_path = f'pickles/{os.path.basename(filepath)}.word_index.pickle'
     unknown_words_path = 'pickles/unknown_words.pickle'
 
-    if os.path.exists(emb_mat_path) and os.path.exists(word_index_path):
+    if os.path.exists(emb_mat_path) and os.path.exists(word_index_path) and os.path.exists(unknown_words_path):
         return pickle.load(open(emb_mat_path, 'rb')), pickle.load(open(word_index_path, 'rb')), pickle.load(open(unknown_words_path, 'rb'))
 
     emb_dict = get_embedding_dictionnary(filepath, dim)
@@ -57,20 +58,20 @@ def get_embeddings_and_word_index(filepath, max_seq_len, vocab, dim=300):
     emb_matrix = np.ndarray((word_number, dim), dtype='float32')
     
     i = 0
-    unknown_words = set()
+    unknown_words = defaultdict(int)
     if vocab:
         for word in vocab:
             word_index[word] = i
             emb_matrix[i] = emb_dict.get(word, emb_dict['<unk>'])
             i += 1
             if word not in emb_dict:
-                unknown_words.add(word)
+                unknown_words[word] += 1
         print(f'Unknown words from the vocabulary: {len(unknown_words)}')
 
     word_index['<max_seq_len>'] = max_seq_len
 
     pickle.dump(emb_matrix, open(emb_mat_path, 'wb'))
-    pickle.dump(emb_dict, open(word_index_path, 'wb'))
+    pickle.dump(word_index, open(word_index_path, 'wb'))
     pickle.dump(unknown_words, open(unknown_words_path, 'wb'))
 
     return emb_matrix, word_index, unknown_words
