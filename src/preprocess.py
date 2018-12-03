@@ -3,6 +3,7 @@ from ekphrasis.classes.tokenizer import SocialTokenizer
 from ekphrasis.dicts.emoticons import emoticons
 from sklearn.base import BaseEstimator, TransformerMixin
 from tqdm import tqdm
+import numpy as np
 
 # custom imports
 try:
@@ -31,17 +32,15 @@ def get_text_processor():
 
 
 class PipelinePreprocessor(BaseEstimator, TransformerMixin):
-    def __init__(self, generator=True):
+    def __init__(self):
         self.pp = get_text_processor()
-        self.generator = generator
 
     def pre_process_steps(self, X):
-        for x in tqdm(X, desc="Preprocessing..."):
-            yield self.pp.pre_process_doc(x)
+        tqdm.pandas(desc="Preprocessing...")
+        return X.progress_apply(self.pp.pre_process_doc)
 
     def transform(self, X, y=None):
-        preprocessed = self.pre_process_steps(X)
-        return preprocessed if self.generator else tuple(preprocessed)
+        return self.pre_process_steps(X)
 
     def fit(self, X, y=None):
         return self
@@ -57,7 +56,7 @@ if __name__ == '__main__':
         "@SentimentSymp:  can't wait for the Nov 9 #Sentiment talks!  YAAAAAAY !!! :-D http://sentimentsymposium.com/."
     ]
 
-    pipeline = Pipeline([('preprocess', PipelinePreprocessor(generator=False))])
+    pipeline = Pipeline([('preprocess', PipelinePreprocessor())])
     sentences = pipeline.fit_transform(sentences)
     
     for s in sentences:
