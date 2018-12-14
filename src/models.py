@@ -2,7 +2,7 @@ from keras.models import Sequential
 from keras.layers import *
 
 
-def model_mine(embedding_matrix, max_seq_len):
+def model_mine(embedding_matrix, max_seq_len, class_number=4):
     vocab_size = embedding_matrix.shape[0]
     embedding_size = embedding_matrix.shape[1]
 
@@ -15,9 +15,11 @@ def model_mine(embedding_matrix, max_seq_len):
     model.add(Bidirectional(LSTM(150, return_sequences=True)))
     model.add(Dropout(0.5))
     model.add(Flatten())
-    model.add(Dense(4, activation='softmax'))
+    model.add(Dense(class_number, activation='softmax'))
 
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
+    loss_f = 'binary_crossentropy' if class_number == 2 else 'categorical_crossentropy'
+    
+    model.compile(loss=loss_f, optimizer='adam', metrics=['acc'])
 
     print(model.summary())
     

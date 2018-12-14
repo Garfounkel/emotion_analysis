@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 # custom imports
 from .preprocess import PipelinePreprocessor
 from .embeddings import sequences_to_index
+from .evaluate import emotion2label
 
 
 def load_dataset(filepath, has_labels=True):
@@ -14,7 +15,7 @@ def load_dataset(filepath, has_labels=True):
     text = tweet['turn1'] + ' <eos> ' + tweet['turn2'] + ' <eos> ' + tweet['turn3']
 
     if has_labels:
-        labels = tweet['label'].apply(lambda x: {'angry': 0, 'happy': 1, 'sad': 2}.get(x, 3))
+        labels = tweet['label'].apply(lambda x: emotion2label.get(x, 3))
         return text, labels
     else:
         return text, tweet
@@ -22,10 +23,10 @@ def load_dataset(filepath, has_labels=True):
 
 def load_datasets_and_vocab_pipeline():
     train_file = 'data/train.txt'
-    test_file = 'data/test.txt'
+    test_file = 'data/true_test.txt'
 
     X_train, y_train = load_dataset(train_file)
-    X_test, _ = load_dataset(test_file, has_labels=False)
+    X_test, y_test = load_dataset(test_file)
 
     pipeline = Pipeline([('preprocess', PipelinePreprocessor())])
 
@@ -40,7 +41,7 @@ def load_datasets_and_vocab_pipeline():
         if len(seq) > max_len:
             max_len = len(seq)
 
-    return (X_train, y_train), X_test, (vocab, max_len)
+    return (X_train, y_train), (X_test, y_test), (vocab, max_len)
 
 
 def load_submission_dataset(filepath):
@@ -58,10 +59,10 @@ def train_test_val_split(X, y, final=False):
 
         return (x_train, y_train), (x_val, y_val)
     else:
-        train_ratio = 0.8
-        val_test_ratio = 0.5
+        train_ratio = 0.7
+#         val_test_ratio = 0.5
 
         x_train, x_rest, y_train, y_rest = train_test_split(X, y, test_size=(1 - train_ratio))
-        x_val, x_test, y_val, y_test = train_test_split(x_rest, y_rest, test_size=(1 - val_test_ratio))
+#         x_val, x_test, y_val, y_test = train_test_split(x_rest, y_rest, test_size=(1 - val_test_ratio))
 
-        return (x_train, y_train), (x_val, y_val), (x_test, y_test)
+        return (x_train, y_train), (x_rest, y_rest)#(x_val, y_val), (x_test, y_test)

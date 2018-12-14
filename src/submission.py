@@ -5,7 +5,7 @@ from .embeddings import sequences_to_index
 import numpy as np
 
 
-def generate_predictions(model, submission_file_path, word_index=None):
+def generate_predictions(model, submission_file_path, word_index=None, targets=None):
     print('Loading dataset...')
     X_test, df_test = load_submission_dataset(submission_file_path)
 
@@ -17,10 +17,12 @@ def generate_predictions(model, submission_file_path, word_index=None):
     X_test = sequences_to_index(X_test, word_index, max_seq_len)
 
     print('Generating Predictions...')
-    y_pred = get_predictions(model, X_test)
+    y_pred = get_predictions(model, X_test, targets=targets)
 
     df_test['label'] = np.vectorize(lambda x: label2emotion[x])(y_pred)
 
     with open('submission.txt', 'w') as file:
         df_test.to_csv(path_or_buf=file, sep='\t', index=False)
     print("Done. Wrote submission.txt file at project's root")
+    
+    return y_pred
