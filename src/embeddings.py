@@ -14,6 +14,20 @@ from collections import defaultdict
 [X] Add the vocabulary to the call of get_embedding_and_word_index(...)
 '''
 
+def get_corresponding_closing_tag(emb_dict, tag):
+    '''
+    This is used to compute a slightly better vector for missing closing tags.
+    Example: A closing tag for "<hashtag>" is "</hashtag>", 
+    therefore the difference between "<hashtag>" and "</hashtag>" should be close 
+    to the difference of any tag "<tag>" and it's closing tag "</tag>".
+    
+    This relies on the property of word2vec to preserve semantic and syntactic
+    relationships through arithmetic (ex: brother - man + woman = sister).
+    '''
+    close_tag_difference = emb_dict['<hashtag>'] - emb_dict['</hashtag>']
+    return emb_dict[tag] - close_tag_difference
+
+
 def get_embedding_dictionnary(filepath, dim=300):
     emb_dict_path = f'pickles/{os.path.basename(filepath)}.dict.pickle'
 
@@ -30,6 +44,8 @@ def get_embedding_dictionnary(filepath, dim=300):
             emb_dict[word] = vec
 
     emb_dict['<unk>'] = np.random.uniform(low=-0.05, high=0.05, size=dim)
+    emb_dict['<eos>'] = np.random.uniform(low=-0.05, high=0.05, size=dim)
+    emb_dict['</allcaps>'] = get_corresponding_closing_tag(emb_dict, '<allcaps>')
     emb_dict['<pad>'] = np.zeros(dim)
 
     pickle.dump(emb_dict, open(emb_dict_path, 'wb'))
@@ -51,7 +67,7 @@ def get_embeddings_and_word_index(filepath, max_seq_len, vocab, dim=300):
     emb_dict = get_embedding_dictionnary(filepath, dim)
     emb_dict = enrich_embedding_dictionnary(emb_dict)
 
-    vocab.update(['<unk>', '<pad>'])
+    vocab.update(['<unk>', '<pad>', '<eos>', '</allcaps>'])
     word_number = len(vocab)
 
     word_index = dict()

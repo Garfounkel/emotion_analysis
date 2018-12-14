@@ -6,6 +6,7 @@ Emoticons and Emoji data dictonary
 
 emojis = {
     "＼(^o^)／": "<happy>",
+    "(^・^)": "<happy>",
     ":‑\)":"☺️",
     ":\)":"☺️",
     ":-\]":"☺️",
