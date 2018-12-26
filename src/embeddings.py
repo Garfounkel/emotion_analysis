@@ -2,7 +2,9 @@ import os
 import numpy as np
 import pickle
 import itertools
-from collections import defaultdict
+
+# custom imports
+from .spellcheck import get_spellcheck_dict
 
 
 '''
@@ -29,6 +31,11 @@ def get_corresponding_closing_tag(emb_dict, tag):
 
 
 def get_embedding_dictionnary(filepath, dim=300):
+    '''
+    Reads the file containing datastorie's embeddings and returns a dictionary of words to vectors.
+    Adds special tokens like <unk>, <eos>, </allcaps and <pad> that are not present in datastories.
+    returns: dict[words -> vectors]
+    '''
     emb_dict_path = f'pickles/{os.path.basename(filepath)}.dict.pickle'
 
     if os.path.exists(emb_dict_path):
@@ -74,17 +81,18 @@ def get_embeddings_and_word_index(filepath, max_seq_len, vocab, dim=300):
     emb_matrix = np.ndarray((word_number, dim), dtype='float32')
     
     i = 0
-    unknown_words = defaultdict(int)
+    unknown_words = set()
     if vocab:
         for word in vocab:
             word_index[word] = i
             emb_matrix[i] = emb_dict.get(word, emb_dict['<unk>'])
             i += 1
             if word not in emb_dict:
-                unknown_words[word] += 1
-        print(f'Unknown words from the vocabulary: {len(unknown_words)}')
+                unknown_words.add(word)
 
     word_index['<max_seq_len>'] = max_seq_len
+
+    emb_matrix = embed_misspellings(unknown_words, emb_matrix, emb_dict, word_index)
 
     pickle.dump(emb_matrix, open(emb_mat_path, 'wb'))
     pickle.dump(word_index, open(word_index_path, 'wb'))
@@ -93,7 +101,31 @@ def get_embeddings_and_word_index(filepath, max_seq_len, vocab, dim=300):
     return emb_matrix, word_index, unknown_words
 
 
+def embed_misspellings(unknown_words, emb_matrix, emb_dict, word_index):
+    '''
+    Add most misspelled words to the embedding matrix using their correct word's vector counterpart.
+    '''
+    unknown_big_words = {word for word in unknown_words if len(word) > 3}
+    spellcheck_dict = get_spellcheck_dict(unknown_words)
+    still_unknown = set()
+
+    for word, correction in spellcheck_dict.items():
+        if word != correction and correction in emb_dict:
+            index = word_index[word]
+            emb_matrix[index] = emb_dict[correction]
+        else:
+            still_unknown.add((word, correction))
+
+    unknown_words.clear()
+    unknown_words.update(still_unknown)
+
+    return emb_matrix
+
+
 def sequences_to_index(sequences, word_index, max_len):
+    '''
+    Turns sequences of words to sequences of indexes for the embedding layer.
+    '''
     for i, seq in enumerate(sequences):
         for j, word in enumerate(seq):
             index = word_index.get(word, word_index['<unk>'])
