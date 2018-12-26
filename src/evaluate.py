@@ -8,21 +8,26 @@ from sklearn.metrics import confusion_matrix
 label2emotion = {0: 'angry', 1: 'happy', 2: 'sad', 3: 'others'}
 emotion2label = {"others": 3, "happy": 1, "sad": 2, "angry": 0}
 
-def plot_confusion_matrix(confusion_matrix, class_names, figsize = (7,5), fontsize=14):
+def plot_confusion_matrix(confusion_matrix, class_names, figsize = (7,5), fontsize=14, ax=None, title='Confusion matrix'):
     df_cm = pd.DataFrame(confusion_matrix, index=class_names, columns=class_names)
-    fig = plt.figure(figsize=figsize)
-    try:
-        heatmap = sns.heatmap(df_cm, annot=True, fmt="d", cmap=plt.cm.Blues, annot_kws={"size": fontsize})
-    except ValueError:
-        raise ValueError("Confusion matrix values must be integers.")
+    if not ax:
+        fig = plt.figure(figsize=figsize)
+    heatmap = sns.heatmap(df_cm, annot=True, fmt="d", cmap=plt.cm.Blues, annot_kws={"size": fontsize}, ax=ax)
     heatmap.yaxis.set_ticklabels(heatmap.yaxis.get_ticklabels(), rotation=0, ha='right', fontsize=fontsize)
     heatmap.xaxis.set_ticklabels(heatmap.xaxis.get_ticklabels(), rotation=45, ha='right', fontsize=fontsize)
-    plt.ylabel('True label', fontsize=fontsize)
-    plt.xlabel('Predicted label', fontsize=fontsize)
-    return fig
+    heatmap.set_ylabel('True label', fontsize=fontsize)
+    heatmap.set_xlabel('Predicted label', fontsize=fontsize)
+    heatmap.set_title(title, fontsize=fontsize)
 
 
-def get_metrics(predictions, ground, NUM_CLASSES=4):
+def plot_2_cm(cm1, cm2, class_names, titles):
+    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(14,5))
+    plot_confusion_matrix(cm1, class_names, ax=ax1, title=titles[0])
+    plot_confusion_matrix(cm2, class_names, ax=ax2, title=titles[1])
+    fig.tight_layout()
+
+
+def get_metrics(predictions, ground, NUM_CLASSES=4, print_all=True):
     """Given predicted labels and the respective ground truth labels, display some metrics
     Input: shape [# of samples, NUM_CLASSES]
         predictions : Model output. Every row has 4 decimal values, with the highest belonging to the predicted class
@@ -80,19 +85,30 @@ def get_metrics(predictions, ground, NUM_CLASSES=4):
     ground = ground.argmax(axis=1)
     accuracy = np.mean(predictions==ground)
     print()
-    print("Accuracy : %.4f, Micro Precision : %.4f, Micro Recall : %.4f, Micro F1 : %.4f" % (accuracy, microPrecision, microRecall, microF1))
+    if print_all:
+        print("Accuracy : %.4f, Micro Precision : %.4f, Micro Recall : %.4f, Micro F1 : %.4f" % (accuracy, microPrecision, microRecall, microF1))
     
     cm = confusion_matrix(ground, predictions)
-    plot_confusion_matrix(cm, ['angry', 'happy', 'sad', 'others'][:NUM_CLASSES])
 
-    return accuracy, microPrecision, microRecall, microF1
+    return accuracy, microPrecision, microRecall, microF1, cm
 
 
-def get_predictions(model, id_sequences, targets=None):
+def get_predictions(model, id_sequences):
     predictions = model.predict(id_sequences, batch_size=128)
     y_pred = np.argmax(predictions, axis=1)
 
-    if targets is not None:
-        get_metrics(predictions, targets)
-
     return y_pred
+
+
+def compare_metrics(model, id_sequences, targets, compare_dict):
+    y_pred = get_predictions(model, id_sequences)
+
+    accuracy, microPrecision, microRecall, microF1, cm = get_metrics(predictions, targets, print_all=False)
+
+    print("Accuracy: %.4f, Micro F1: %.4f" % (accuracy, microF1))
+    print("Previous best: Accuracy: %.4f, Micro F1: %.4f" % (compare_dict['acc'], compare_dict['f1']))
+    plot_2_cm(cm, compare_dict['cm'], ['angry', 'happy', 'sad', 'others'][:NUM_CLASSES], titles=['Model', 'Previous best'])
+
+    model_compare_dict = {'f1': microF1, 'acc': accuracy, 'cm': cm}
+
+    return y_pred, model_compare_dict
