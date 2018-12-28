@@ -44,3 +44,18 @@ def load_model_full(acc, f1, binary):
     print(f'Loaded model from {model_name}')
 
     return model, emb_matrix, word_index, model_metrics
+
+
+def load_best_metrics(binary=False):
+    directory = 'pickles/models/binary/' if binary else 'pickles/models/categorical/'
+    
+    direct_subdirectories = next(os.walk(directory))[1]
+    
+    best_metrics = {'f1': 0}
+    for model_name in direct_subdirectories:
+        metrics = pickle.load(open(f'{directory}{model_name}/model_metrics.pickle', 'rb'))
+        if metrics['f1'] > best_metrics['f1']:
+            best_metrics = metrics
+    
+    print(f'Best {"binary" if binary else "categorical"} model is {model_name} with f1={best_metrics["f1"]}')
+    return best_metrics
