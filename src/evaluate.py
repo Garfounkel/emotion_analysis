@@ -97,18 +97,18 @@ def get_predictions(model, id_sequences):
     predictions = model.predict(id_sequences, batch_size=128)
     y_pred = np.argmax(predictions, axis=1)
 
-    return y_pred
+    return y_pred, predictions
 
 
-def compare_metrics(model, id_sequences, targets, compare_dict):
-    y_pred = get_predictions(model, id_sequences)
+def compare_metrics(proba_pred, targets, compared_metrics, binary_model=False):
+    accuracy, microPrecision, microRecall, microF1, cm = get_metrics(proba_pred, targets, print_all=False)
+    compared_acc, compared_f1, compared_cm = compared_metrics['acc'], compared_metrics['f1'], compared_metrics['cm']
+    class_names = ['ang_hap_sad', 'others'] if binary_model else ['angry', 'happy', 'sad', 'others']
 
-    accuracy, microPrecision, microRecall, microF1, cm = get_metrics(predictions, targets, print_all=False)
+    title_1 = f'Model (acc: {accuracy:.4f}, micro F1: {microF1:.4f})'
+    title_2 = f'Previous best (acc: {compared_acc:.4f}, micro F1: {compared_f1:.4f})'
+    plot_2_cm(cm, compared_cm, class_names, titles=[title_1, title_2])
 
-    print("Accuracy: %.4f, Micro F1: %.4f" % (accuracy, microF1))
-    print("Previous best: Accuracy: %.4f, Micro F1: %.4f" % (compare_dict['acc'], compare_dict['f1']))
-    plot_2_cm(cm, compare_dict['cm'], ['angry', 'happy', 'sad', 'others'][:NUM_CLASSES], titles=['Model', 'Previous best'])
+    model_metrics = {'f1': microF1, 'acc': accuracy, 'cm': cm, 'y_proba': proba_pred, 'targets': targets, 'binary': binary_model}
 
-    model_compare_dict = {'f1': microF1, 'acc': accuracy, 'cm': cm}
-
-    return y_pred, model_compare_dict
+    return model_metrics

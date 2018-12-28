@@ -17,7 +17,7 @@ def generate_predictions(model, submission_file_path, word_index=None, targets=N
     X_test = sequences_to_index(X_test, word_index, max_seq_len)
 
     print('Generating Predictions...')
-    y_pred = get_predictions(model, X_test, targets=targets)
+    y_pred = get_predictions(model, X_test)
 
     df_test['label'] = np.vectorize(lambda x: label2emotion[x])(y_pred)
 
