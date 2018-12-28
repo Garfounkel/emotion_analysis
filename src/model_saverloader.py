@@ -21,8 +21,7 @@ def save_model_full(model, emb_matrix, word_index, model_metrics):
 
     model_name, em_path, wi_path, model_path, mm_path = get_model_paths(acc, f1, binary)
 
-    if not os.path.exists(model_name):
-        os.makedirs(model_name)
+    os.makedirs(model_name, exist_ok=False)
 
     for file_path, obj in [(em_path, emb_matrix), (wi_path, word_index), (mm_path, model_metrics)]:
         with open(file_path, 'wb') as file:
