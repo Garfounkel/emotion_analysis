@@ -61,7 +61,7 @@ def load_best_metrics(mode='categorical'):
     if mode not in ['categorical', 'binary', 'ensemble']:
         raise ValueError("mode argument must be 'categorical', 'binary' or 'ensemble'")
 
-    directory = f'pickles/models/{mode}'
+    directory = f'pickles/models/{mode}/'
     
     best_metrics = {'f1': 0}
     best_model_name = None

@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, f1_score, accuracy_score
 
 label2emotion = {0: 'angry', 1: 'happy', 2: 'sad', 3: 'others'}
 emotion2label = {"others": 3, "happy": 1, "sad": 2, "angry": 0}
@@ -93,6 +93,18 @@ def get_metrics(predictions, ground, NUM_CLASSES=4, print_all=True):
     return accuracy, microPrecision, microRecall, microF1, cm
 
 
+def get_metrics_binary(proba_preds, targets):
+    binarize = np.vectorize(lambda x: 0 if x in [0, 1, 2] else 1)
+
+    y_hat = proba_preds.argmax(axis=1)
+    if np.max(y_hat) == 3:
+        y_hat = binarize(y_hat)
+    
+    bin_y_test = binarize(targets.argmax(axis=1))
+    
+    return accuracy_score(y_hat, bin_y_test), f1_score(y_hat, bin_y_test), confusion_matrix(y_hat, bin_y_test)
+
+
 def get_predictions(model, id_sequences):
     predictions = model.predict(id_sequences, batch_size=128)
     y_pred = np.argmax(predictions, axis=1)
@@ -101,10 +113,14 @@ def get_predictions(model, id_sequences):
 
 
 def compare_metrics(proba_pred, targets, compared_metrics, binary_model=False):
-    num_classes = 2 if binary_model else 4
-    accuracy, microPrecision, microRecall, microF1, cm = get_metrics(proba_pred, targets, NUM_CLASSES=num_classes, print_all=False)
+    if binary_model:
+        class_names = ['an_ha_sa', 'others']
+        accuracy, microF1, cm = get_metrics_binary(proba_pred, targets)
+    else:
+        class_names = ['angry', 'happy', 'sad', 'others']
+        accuracy, _, _, microF1, cm = get_metrics(proba_pred, targets, print_all=False)
+
     compared_acc, compared_f1, compared_cm = compared_metrics['acc'], compared_metrics['f1'], compared_metrics['cm']
-    class_names = ['ang_hap_sad', 'others'] if binary_model else ['angry', 'happy', 'sad', 'others']
 
     title_1 = f'Model (acc: {accuracy:.4f}, micro F1: {microF1:.4f})'
     title_2 = f'Previous best (acc: {compared_acc:.4f}, micro F1: {compared_f1:.4f})'
