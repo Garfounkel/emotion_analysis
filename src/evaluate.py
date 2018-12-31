@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, f1_score, accuracy_score
 
+from .utils import check_mode
+
 label2emotion = {0: 'angry', 1: 'happy', 2: 'sad', 3: 'others'}
 emotion2label = {"others": 3, "happy": 1, "sad": 2, "angry": 0}
 
@@ -112,8 +114,13 @@ def get_predictions(model, id_sequences):
     return y_pred, predictions
 
 
-def compare_metrics(proba_pred, targets, compared_metrics, binary_model=False):
-    if binary_model:
+def compare_metrics(proba_pred, targets, compared_metrics, mode='categorical'):
+    '''
+    mode is either categorical, binary or ensemble
+    '''
+    check_mode(mode)
+
+    if mode == 'binary':
         class_names = ['an_ha_sa', 'others']
         accuracy, microF1, cm = get_metrics_binary(proba_pred, targets)
     else:
@@ -126,7 +133,7 @@ def compare_metrics(proba_pred, targets, compared_metrics, binary_model=False):
     title_2 = f'Previous best (acc: {compared_acc:.4f}, micro F1: {compared_f1:.4f})'
     plot_2_cm(cm, compared_cm, class_names, titles=[title_1, title_2])
 
-    model_metrics = {'f1': microF1, 'acc': accuracy, 'cm': cm, 'y_proba': proba_pred, 'targets': targets, 'binary': binary_model}
+    model_metrics = {'f1': microF1, 'acc': accuracy, 'cm': cm, 'y_proba': proba_pred, 'targets': targets, 'mode': mode}
 
     return model_metrics
 

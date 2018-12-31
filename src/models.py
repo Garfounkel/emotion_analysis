@@ -1,5 +1,9 @@
 from keras.models import Sequential
 from keras.layers import *
+import pickle
+
+from .model_saverloader import load_model_full
+from .embeddings import sequences_to_index
 
 
 def model_mine(embedding_matrix, max_seq_len, class_number=4):
@@ -24,3 +28,28 @@ def model_mine(embedding_matrix, max_seq_len, class_number=4):
     print(model.summary())
     
     return model
+
+
+class EnsembleModel():
+    def __init__(self, model, model_metrics, sub_models_metrics):
+        self.model = model
+        self.model_metrics = model_metrics
+        self.sub_models_metrics = sub_models_metrics
+    
+    def predict(self, text_sequences, batch_size=128):
+        list_preds = []
+        
+        for metrics in self.sub_models_metrics:
+            sub_model, _, sub_word_index, _ = load_model_full(metrics['acc'], metrics['f1'], metrics['mode'])
+            seq_samples = pickle.loads(pickle.dumps(text_sequences))  # deep copy
+            seq_samples = sequences_to_index(seq_samples, sub_word_index, sub_word_index['<max_seq_len>'])
+            list_preds.append(sub_model.predict(seq_samples, batch_size=batch_size))
+
+        combi_preds = np.hstack(list_preds)
+        
+        predictions = self.model.predict_proba(combi_preds)
+
+        return predictions
+    
+    def is_ensemble_model(self):
+        return True

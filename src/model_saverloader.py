@@ -2,8 +2,10 @@ import os
 import pickle
 from keras.models import load_model
 
+from .utils import check_mode
 
-def get_model_paths(acc, f1, mode='categorical'):  # TODO: Fix mode for save_model_full and load_model_full
+
+def get_model_paths(acc, f1, mode='categorical'):
     model_name = f'acc_{acc:.4f}-f1_{f1:.4f}'
     model_name = f'{mode}/{model_name}/'
     model_name = f'pickles/models/{model_name}'
@@ -17,10 +19,10 @@ def get_model_paths(acc, f1, mode='categorical'):  # TODO: Fix mode for save_mod
     
 
 def save_model_full(model, emb_matrix, word_index, model_metrics):
-    acc, f1, binary = model_metrics['acc'], model_metrics['f1'], model_metrics['binary']  # Todo: Fix model_metrics['binary'] to 'mode'
+    acc, f1, binary = model_metrics['acc'], model_metrics['f1'], model_metrics['mode']
 
-    mode = 'binary' if binary else 'categorical'
     model_name, em_path, wi_path, model_path, mm_path = get_model_paths(acc, f1, mode)
+    model_metrics['name'] = model_name
 
     os.makedirs(model_name, exist_ok=False)
 
@@ -34,8 +36,7 @@ def save_model_full(model, emb_matrix, word_index, model_metrics):
 
 
 def load_model_full(acc, f1, mode='categorical'):
-    if mode not in ['categorical', 'binary', 'ensemble']:
-        raise ValueError("mode argument must be 'categorical', 'binary' or 'ensemble'")
+    check_mode(mode)
 
     model_name, em_path, wi_path, model_path, mm_path = get_model_paths(acc, f1, mode)
 
@@ -48,18 +49,42 @@ def load_model_full(acc, f1, mode='categorical'):
 
     return model, emb_matrix, word_index, model_metrics
 
-def save_ensemble_model(model, sub_model_names, model_metrics):
+def save_ensemble_model(model, model_metrics, sub_models_metrics):
+    '''
+    model: ensemble model
+    model_metrics: current model metrics
+    sub_models_metrics: list of model_metrics
+    '''
     acc, f1 = model_metrics['acc'], model_metrics['f1']
-    
-    raise NotImplementedError  # Todo: Implement
+    model_name, _, _, model_path, mm_path = get_model_paths(acc, f1, 'ensemble')
+    sub_mm_path = f'{model_name}sub_model_metrics.pickle'
+
+    os.makedirs(model_name, exist_ok=False)
+
+    pickle.dump(model, open(model_path, 'wb'))
+    pickle.dump(model_metrics, open(mm_path, 'wb'))
+    pickle.dump(sub_models_metrics, open(sub_mm_path, 'wb'))
+
+    print(f'Model saved at {model_name}')
+
+
+def load_ensemble_model(acc, f1):
+    model_name, _, _, model_path, mm_path = get_model_paths(acc, f1, 'ensemble')
+    sub_mm_path = f'{model_name}sub_model_metrics.pickle'
+
+    model = pickle.load(open(model_path, 'rb'))
+    model_metrics = pickle.load(open(mm_path, 'rb'))
+    sub_model_metrics = pickle.load(open(sub_mm_path, 'rb'))
+
+    print(f'Loaded model from {model_name}')
+    return model, model_metrics, sub_model_metrics
 
 
 def load_best_metrics(mode='categorical'):
     '''
     mode is either categorical, binary or ensemble
     '''
-    if mode not in ['categorical', 'binary', 'ensemble']:
-        raise ValueError("mode argument must be 'categorical', 'binary' or 'ensemble'")
+    check_mode(mode)
 
     directory = f'pickles/models/{mode}/'
     
@@ -78,11 +103,10 @@ def load_best_metrics(mode='categorical'):
 
 
 def load_best_model(mode='categorical'):
-    if mode not in ['categorical', 'binary', 'ensemble']:
-        raise ValueError("mode argument must be 'categorical', 'binary' or 'ensemble'")
+    check_mode(mode)
     
     metrics = load_best_metrics(mode)
     if mode in ['categorical', 'binary']:
           return load_model_full(metrics['acc'], metrics['f1'], mode)
     else:
-          raise NotImplementedError  # Todo: Implement
+          return load_ensemble_model(metrics['acc'], metrics['f1'])
