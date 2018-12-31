@@ -99,10 +99,10 @@ def get_metrics_binary(proba_preds, targets):
     y_hat = proba_preds.argmax(axis=1)
     if np.max(y_hat) == 3:
         y_hat = binarize(y_hat)
-    
+
     bin_y_test = binarize(targets.argmax(axis=1))
     
-    return accuracy_score(y_hat, bin_y_test), f1_score(y_hat, bin_y_test), confusion_matrix(y_hat, bin_y_test)
+    return accuracy_score(bin_y_test, y_hat), f1_score(bin_y_test, y_hat), confusion_matrix(bin_y_test, y_hat)
 
 
 def get_predictions(model, id_sequences):
@@ -129,3 +129,19 @@ def compare_metrics(proba_pred, targets, compared_metrics, binary_model=False):
     model_metrics = {'f1': microF1, 'acc': accuracy, 'cm': cm, 'y_proba': proba_pred, 'targets': targets, 'binary': binary_model}
 
     return model_metrics
+
+
+''' def plot_boxes_2v4(preds_4, preds_2, y_test, ...)
+noised_4 = preds_4.argmax(axis=1) + np.random.uniform(low=-0.3, high=0.3, size=len(X_test))
+noised_2 = preds_2.argmax(axis=1) + np.random.uniform(low=-0.3, high=0.3, size=len(X_test))
+
+labels = y_test.argmax(axis=1)
+
+unique = np.unique(labels)
+colors = ['r', 'b', 'g', 'y']
+for i, u in enumerate(unique):
+    xi = [noised_4[j] for j  in range(len(noised_4)) if labels[j] == u]
+    yi = [noised_2[j] for j  in range(len(noised_2)) if labels[j] == u]
+    plt.scatter(xi, yi, c=colors[i], label=str(u))
+plt.legend(loc='center left', bbox_to_anchor=(1, 0.5));
+'''
