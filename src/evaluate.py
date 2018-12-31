@@ -101,7 +101,8 @@ def get_predictions(model, id_sequences):
 
 
 def compare_metrics(proba_pred, targets, compared_metrics, binary_model=False):
-    accuracy, microPrecision, microRecall, microF1, cm = get_metrics(proba_pred, targets, print_all=False)
+    num_classes = 2 if binary_model else 4
+    accuracy, microPrecision, microRecall, microF1, cm = get_metrics(proba_pred, targets, NUM_CLASSES=num_classes, print_all=False)
     compared_acc, compared_f1, compared_cm = compared_metrics['acc'], compared_metrics['f1'], compared_metrics['cm']
     class_names = ['ang_hap_sad', 'others'] if binary_model else ['angry', 'happy', 'sad', 'others']
 
