@@ -131,5 +131,8 @@ def sequences_to_index(sequences, word_index, max_len):
             index = word_index.get(word, word_index['<unk>'])
             sequences[i][j] = index
         pad_len = max_len - len(seq)
-        sequences[i] += list(itertools.repeat(word_index['<pad>'], pad_len))
+        if pad_len > 0:
+            sequences[i] += list(itertools.repeat(word_index['<pad>'], pad_len))
+        else:
+            sequences[i] = sequences[i][:max_len]
     return np.array(sequences.tolist())

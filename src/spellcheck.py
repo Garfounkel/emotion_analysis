@@ -12,7 +12,7 @@ def get_spellcheck_dict(unknown_words):
     '''
     Gets a dictionary of misspeled words and their correct form.
     '''
-    spellcheck_dict_path = f'pickles/spellcheck_dict.pickle'
+    spellcheck_dict_path = f'pickles/spellcheck_dict.sav'
     
     if os.path.exists(spellcheck_dict_path):
         return pickle.load(open(spellcheck_dict_path, 'rb'))
