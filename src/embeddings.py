@@ -122,17 +122,18 @@ def embed_misspellings(unknown_words, emb_matrix, emb_dict, word_index):
     return emb_matrix
 
 
-def sequences_to_index(sequences, word_index, max_len):
+def sequences_to_index(sequences, word_index):
     '''
     Turns sequences of words to sequences of indexes for the embedding layer.
+    Also takes care of the padding.
     '''
+    max_len = word_index['<max_seq_len>']
+    idx_sequences = np.full(shape=(len(sequences), max_len), fill_value=word_index['<pad>'])
+
     for i, seq in enumerate(sequences):
-        for j, word in enumerate(seq):
+        for j in range(min(len(seq), max_len)):
+            word = seq[j]
             index = word_index.get(word, word_index['<unk>'])
-            sequences[i][j] = index
-        pad_len = max_len - len(seq)
-        if pad_len > 0:
-            sequences[i] += list(itertools.repeat(word_index['<pad>'], pad_len))
-        else:
-            sequences[i] = sequences[i][:max_len]
-    return np.array(sequences.tolist())
+            idx_sequences[i][j] = index
+
+    return idx_sequences

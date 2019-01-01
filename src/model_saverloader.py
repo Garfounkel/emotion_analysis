@@ -19,7 +19,7 @@ def get_model_paths(acc, f1, mode='categorical'):
     
 
 def save_model_full(model, emb_matrix, word_index, model_metrics):
-    acc, f1, binary = model_metrics['acc'], model_metrics['f1'], model_metrics['mode']
+    acc, f1, mode = model_metrics['acc'], model_metrics['f1'], model_metrics['mode']
 
     model_name, em_path, wi_path, model_path, mm_path = get_model_paths(acc, f1, mode)
     model_metrics['name'] = model_name
