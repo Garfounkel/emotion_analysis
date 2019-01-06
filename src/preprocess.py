@@ -32,6 +32,9 @@ def get_text_processor():
 
 
 class PipelinePreprocessor(BaseEstimator, TransformerMixin):
+    '''
+    Pipeline for our preprocessing.
+    '''
     def __init__(self):
         self.pp = get_text_processor()
 

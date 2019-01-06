@@ -6,6 +6,9 @@ from .utils import check_mode
 
 
 def get_model_paths(acc, f1, mode='categorical'):
+    '''
+    Get paths names given a model accuracy, f1 and mode.
+    '''
     model_name = f'acc_{acc:.4f}-f1_{f1:.4f}'
     model_name = f'{mode}/{model_name}/'
     model_name = f'pickles/models/{model_name}'
@@ -13,12 +16,15 @@ def get_model_paths(acc, f1, mode='categorical'):
     emb_mat_path = f'{model_name}emb_matrix.pickle'
     word_index_path = f'{model_name}word_index.pickle'
     model_path = f'{model_name}model.h5'
-    model_metrics_path = f'{model_name}model_metrics.pickle'
+    model_metrics_path = f'{model_name}model_metrics.sav'
 
     return model_name, emb_mat_path, word_index_path, model_path, model_metrics_path
     
 
 def save_model_full(model, emb_matrix, word_index, model_metrics):
+    '''
+    Saves a binary or categorical model.
+    '''
     acc, f1, mode = model_metrics['acc'], model_metrics['f1'], model_metrics['mode']
 
     model_name, em_path, wi_path, model_path, mm_path = get_model_paths(acc, f1, mode)
@@ -36,6 +42,9 @@ def save_model_full(model, emb_matrix, word_index, model_metrics):
 
 
 def load_model_full(acc, f1, mode='categorical'):
+    '''
+    Loads a binary or categorical model.
+    '''
     check_mode(mode)
 
     model_name, em_path, wi_path, model_path, mm_path = get_model_paths(acc, f1, mode)
@@ -51,13 +60,14 @@ def load_model_full(acc, f1, mode='categorical'):
 
 def save_ensemble_model(model, model_metrics, sub_models_metrics):
     '''
+    Saves an ensemble model.
     model: ensemble model
     model_metrics: current model metrics
     sub_models_metrics: list of model_metrics
     '''
     acc, f1 = model_metrics['acc'], model_metrics['f1']
     model_name, _, _, model_path, mm_path = get_model_paths(acc, f1, 'ensemble')
-    sub_mm_path = f'{model_name}sub_model_metrics.pickle'
+    sub_mm_path = f'{model_name}sub_model_metrics.sav'
 
     os.makedirs(model_name, exist_ok=False)
 
@@ -69,8 +79,11 @@ def save_ensemble_model(model, model_metrics, sub_models_metrics):
 
 
 def load_ensemble_model(acc, f1):
+    '''
+    Loads an ensemble model.
+    '''
     model_name, _, _, model_path, mm_path = get_model_paths(acc, f1, 'ensemble')
-    sub_mm_path = f'{model_name}sub_model_metrics.pickle'
+    sub_mm_path = f'{model_name}sub_model_metrics.sav'
 
     model = pickle.load(open(model_path, 'rb'))
     model_metrics = pickle.load(open(mm_path, 'rb'))
@@ -82,6 +95,7 @@ def load_ensemble_model(acc, f1):
 
 def load_best_metrics(mode='categorical'):
     '''
+    Loads the best metrics for a given mode.
     mode is either categorical, binary or ensemble
     '''
     check_mode(mode)
@@ -93,7 +107,7 @@ def load_best_metrics(mode='categorical'):
 
     direct_subdirectories = next(os.walk(directory))[1]
     for model_name in direct_subdirectories:
-        metrics = pickle.load(open(f'{directory}{model_name}/model_metrics.pickle', 'rb'))
+        metrics = pickle.load(open(f'{directory}{model_name}/model_metrics.sav', 'rb'))
         if metrics['f1'] > best_metrics['f1']:
             best_metrics = metrics
             best_model_name = model_name
@@ -103,6 +117,9 @@ def load_best_metrics(mode='categorical'):
 
 
 def load_best_model(mode='categorical'):
+    '''
+    Loads the best model for a given mode.
+    '''
     check_mode(mode)
     
     metrics = load_best_metrics(mode)

@@ -7,15 +7,6 @@ import itertools
 from .spellcheck import get_spellcheck_dict
 
 
-'''
-# TODO:
--------
-[X] Convert datastories.txt to embedding dictionnary and dump the resulting embedding
-[ ] Enrich the embedding dictionnary with external ressources (Emolex, OLE, Emoji Valence, Depeche Mood, ...)
-[X] Build the embedding matrix corresponding to our vocabulary using the embedding dictionnary
-[X] Add the vocabulary to the call of get_embedding_and_word_index(...)
-'''
-
 def get_corresponding_closing_tag(emb_dict, tag):
     '''
     This is used to compute a slightly better vector for missing closing tags.
@@ -64,6 +55,9 @@ def enrich_embedding_dictionnary(emb_dict):
 
 
 def get_embeddings_and_word_index(filepath, max_seq_len, vocab, dim=300):
+    '''
+    Creates an embedding matrix as well as a word index for our vocabulary.
+    '''
     emb_mat_path = f'pickles/{os.path.basename(filepath)}.matrix.pickle'
     word_index_path = f'pickles/{os.path.basename(filepath)}.word_index.pickle'
     unknown_words_path = 'pickles/unknown_words.pickle'

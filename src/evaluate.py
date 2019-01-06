@@ -9,6 +9,9 @@ from .utils import check_mode, label2emotion, emotion2label
 
 
 def plot_confusion_matrix(confusion_matrix, class_names, figsize = (7,5), fontsize=14, ax=None, title='Confusion matrix'):
+    '''
+    Plots a confusion matrix.
+    '''
     df_cm = pd.DataFrame(confusion_matrix, index=class_names, columns=class_names)
     if not ax:
         fig = plt.figure(figsize=figsize)
@@ -94,6 +97,9 @@ def get_metrics(predictions, ground, NUM_CLASSES=4, print_all=True):
 
 
 def get_metrics_binary(proba_preds, targets):
+    '''
+    Given predicted labels and the respective ground truth labels, display some metrics, binary version.
+    '''
     binarize = np.vectorize(lambda x: 0 if x in [0, 1, 2] else 1)
 
     y_hat = proba_preds.argmax(axis=1)
@@ -106,6 +112,9 @@ def get_metrics_binary(proba_preds, targets):
 
 
 def get_predictions(model, id_sequences):
+    '''
+    Computes predictions for a given model and sequences.
+    '''
     predictions = model.predict(id_sequences, batch_size=128)
     y_pred = np.argmax(predictions, axis=1)
 
@@ -114,6 +123,7 @@ def get_predictions(model, id_sequences):
 
 def compare_metrics(proba_pred, targets, compared_metrics, mode='categorical'):
     '''
+    Compare the predictions of a given model with the metrics of a previous model in a side by side view.
     mode is either categorical, binary or ensemble
     '''
     check_mode(mode)

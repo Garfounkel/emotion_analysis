@@ -6,6 +6,9 @@ label2emotion = {0: 'angry', 1: 'happy', 2: 'sad', 3: 'others'}
 emotion2label = {"others": 3, "happy": 1, "sad": 2, "angry": 0}
 
 def reindex_sequences(seq_samples, src_word_index, dst_word_index):
+    '''
+    Reindex sequences given the source word_index and the target word_index.
+    '''
     src_index_word = {v: k for k, v in src_word_index.items()}
     for seq in seq_samples:
         for i in range(len(seq)):
@@ -15,11 +18,17 @@ def reindex_sequences(seq_samples, src_word_index, dst_word_index):
 
 
 def check_mode(mode):
+    '''
+    Check mode argument for model_saver_loader.py
+    '''
     if mode not in ['categorical', 'binary', 'ensemble']:
         raise ValueError("mode argument must be 'categorical', 'binary' or 'ensemble'")
 
 
 def get_wrongs(y_proba, targets, texts, emotion=None):
+    '''
+    Get wrongly classified texts given an emotion.
+    '''
     if emotion:
         emo_idx = emotion2label[emotion]
 

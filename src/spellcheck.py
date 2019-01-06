@@ -25,13 +25,3 @@ def get_spellcheck_dict(unknown_words):
     pickle.dump(spellcheck_dict, open(spellcheck_dict_path, 'wb'))
     
     return spellcheck_dict
-
-
-'''
-from spellchecker import SpellChecker
-
-checker = SpellChecker()
-
-def spellcheck_2(word):
-    return word, checker.correction(word)
-'''

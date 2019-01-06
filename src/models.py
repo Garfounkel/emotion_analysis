@@ -39,7 +39,7 @@ def model_conv1d(embedding_matrix, max_seq_len, class_number=4):
                         input_length=max_seq_len, trainable=False, name='embedding_layer'))
     model.add(Dropout(0.3))
     model.add(Conv1D(64, 5, padding='same'))
-    model.add(MaxPooling1D(5))  # 3? 4?
+    model.add(MaxPooling1D(5))
     model.add(Dropout(0.5))
     model.add(Bidirectional(LSTM(150, return_sequences=True, recurrent_dropout=0.5)))
     model.add(Dropout(0.5))
@@ -58,6 +58,9 @@ def model_conv1d(embedding_matrix, max_seq_len, class_number=4):
 
 
 class EnsembleModel():
+    '''
+    Serves as an api to aggregates multiple models.
+    '''
     def __init__(self, model, model_metrics, sub_models_metrics):
         self.model = model
         self.model_metrics = model_metrics

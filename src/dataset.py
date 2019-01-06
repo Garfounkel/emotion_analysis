@@ -11,6 +11,9 @@ from .utils import emotion2label
 
 
 def load_dataset(filepath, has_labels=True):
+    '''
+    Load texts and targets from csv file.
+    '''
     tweet = pd.read_csv(filepath, encoding='utf-8',sep='\t')
     text = tweet['turn1'] + ' <eos> ' + tweet['turn2'] + ' <eos> ' + tweet['turn3']
 
@@ -22,6 +25,9 @@ def load_dataset(filepath, has_labels=True):
 
 
 def load_datasets_and_vocab_pipeline():
+    '''
+    Load train and test datasets, preprocess them, creates a common vocabulary and computes the max length.
+    '''
     train_file = 'data/train.txt'
     test_file = 'data/true_test.txt'
 
@@ -45,6 +51,9 @@ def load_datasets_and_vocab_pipeline():
 
 
 def load_submission_dataset(filepath):
+    '''
+    Load a dataset without labels from a csv file and preprocess it.
+    '''
     X_test, df_test = load_dataset(filepath, has_labels=False)
     pipeline = Pipeline([('preprocess', PipelinePreprocessor())])
     X_test = pipeline.fit_transform(X_test)
@@ -52,6 +61,9 @@ def load_submission_dataset(filepath):
 
 
 def train_test_val_split(X, y, final=False):
+    '''
+    Split train set in different ratios depending on the task.
+    '''
     if final:
         train_ratio = 0.95
 
@@ -60,9 +72,7 @@ def train_test_val_split(X, y, final=False):
         return (x_train, y_train), (x_val, y_val)
     else:
         train_ratio = 0.7
-#         val_test_ratio = 0.5
 
         x_train, x_rest, y_train, y_rest = train_test_split(X, y, test_size=(1 - train_ratio))
-#         x_val, x_test, y_val, y_test = train_test_split(x_rest, y_rest, test_size=(1 - val_test_ratio))
 
-        return (x_train, y_train), (x_rest, y_rest)#(x_val, y_val), (x_test, y_test)
+        return (x_train, y_train), (x_rest, y_rest)

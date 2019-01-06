@@ -7,6 +7,9 @@ import numpy as np
 
 
 def generate_predictions(model, submission_file_path, word_index=None, targets=None):
+    '''
+    Generates predictions given a model and a csv file.
+    '''
     print('Loading dataset...')
     X_test, df_test = load_submission_dataset(submission_file_path)
 
