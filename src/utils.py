@@ -1,7 +1,9 @@
-from src.evaluate import emotion2label, label2emotion
 import numpy as np
 import pandas as pd
 
+
+label2emotion = {0: 'angry', 1: 'happy', 2: 'sad', 3: 'others'}
+emotion2label = {"others": 3, "happy": 1, "sad": 2, "angry": 0}
 
 def reindex_sequences(seq_samples, src_word_index, dst_word_index):
     src_index_word = {v: k for k, v in src_word_index.items()}

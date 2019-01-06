@@ -13,7 +13,7 @@ def model_mine(embedding_matrix, max_seq_len, class_number=4):
     model = Sequential()
     model.add(Embedding(vocab_size, embedding_size, weights=[embedding_matrix], 
                         input_length=max_seq_len, trainable=False, name='embedding_layer'))
-    model.add(Dropout(0.3))
+    model.add(Dropout(0.4))
     model.add(Bidirectional(LSTM(150, return_sequences=True, recurrent_dropout=0.5)))
     model.add(Dropout(0.5))
     model.add(Bidirectional(LSTM(150, return_sequences=True, recurrent_dropout=0.5)))
@@ -38,8 +38,9 @@ def model_conv1d(embedding_matrix, max_seq_len, class_number=4):
     model.add(Embedding(vocab_size, embedding_size, weights=[embedding_matrix],
                         input_length=max_seq_len, trainable=False, name='embedding_layer'))
     model.add(Dropout(0.3))
-    model.add(Conv1D(64, 5))
-    model.add(MaxPooling1D(5))
+    model.add(Conv1D(64, 5, padding='same'))
+    model.add(MaxPooling1D(5))  # 3? 4?
+    model.add(Dropout(0.5))
     model.add(Bidirectional(LSTM(150, return_sequences=True, recurrent_dropout=0.5)))
     model.add(Dropout(0.5))
     model.add(Bidirectional(LSTM(150, return_sequences=True, recurrent_dropout=0.5)))
@@ -68,7 +69,7 @@ class EnsembleModel():
         for metrics in self.sub_models_metrics:
             sub_model, _, sub_word_index, _ = load_model_full(metrics['acc'], metrics['f1'], metrics['mode'])
             seq_samples = pickle.loads(pickle.dumps(text_sequences))  # deep copy
-            seq_samples = sequences_to_index(seq_samples, sub_word_index, sub_word_index['<max_seq_len>'])
+            seq_samples = sequences_to_index(seq_samples, sub_word_index)
             list_preds.append(sub_model.predict(seq_samples, batch_size=batch_size))
 
         combi_preds = np.hstack(list_preds)

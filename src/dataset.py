@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 # custom imports
 from .preprocess import PipelinePreprocessor
 from .embeddings import sequences_to_index
-from .evaluate import emotion2label
+from .utils import emotion2label
 
 
 def load_dataset(filepath, has_labels=True):

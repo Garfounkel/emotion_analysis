@@ -5,10 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, f1_score, accuracy_score
 
-from .utils import check_mode
+from .utils import check_mode, label2emotion, emotion2label
 
-label2emotion = {0: 'angry', 1: 'happy', 2: 'sad', 3: 'others'}
-emotion2label = {"others": 3, "happy": 1, "sad": 2, "angry": 0}
 
 def plot_confusion_matrix(confusion_matrix, class_names, figsize = (7,5), fontsize=14, ax=None, title='Confusion matrix'):
     df_cm = pd.DataFrame(confusion_matrix, index=class_names, columns=class_names)
