@@ -154,6 +154,7 @@ def check_submission_file_score(filepath, targets):
 
     accuracy, _, _, microF1, cm = get_metrics(y_pred, targets, print_all=False)
     plot_confusion_matrix(cm, ['angry', 'happy', 'sad', 'others'], title=f'Model (acc: {accuracy:.4f}, micro F1: {microF1:.4f})')
+    return y_pred
 
 
 ''' def plot_boxes_2v4(preds_4, preds_2, y_test, ...)

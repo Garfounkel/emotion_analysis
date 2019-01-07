@@ -61,7 +61,7 @@ def get_most_wrongs(y_proba, targets, texts, emotion=None):
     return wrong_df.iloc[max_proba.argsort()]
 
 
-def fix_thresholds(y_pred, proba_preds, threshold=0.64):
+def fix_thresholds(y_pred, proba_preds, threshold=0.64, final=True):
     '''
     When the classifier is not sure about a prediction (proba < 0.64)
     we classify it as others since it's the most probable class (according to class repartitions).
@@ -69,5 +69,5 @@ def fix_thresholds(y_pred, proba_preds, threshold=0.64):
     for i, (angry, happy, sad, others) in enumerate(proba_preds):
         m = max(angry, happy, sad, others)
         if m < threshold and m != others:
-            y_pred[i] = 3
+            y_pred[i] = 'others' if final else 3
     return y_pred
