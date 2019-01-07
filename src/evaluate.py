@@ -146,6 +146,16 @@ def compare_metrics(proba_pred, targets, compared_metrics, mode='categorical'):
     return model_metrics
 
 
+def check_submission_file_score(filepath, targets):
+    df = pd.read_csv(filepath, encoding='utf-8',sep='\t')
+
+    labels = df['label'].apply(lambda x: emotion2label.get(x, 3))
+    y_pred = to_categorical(labels)
+
+    accuracy, _, _, microF1, cm = get_metrics(y_pred, targets, print_all=False)
+    plot_confusion_matrix(cm, ['angry', 'happy', 'sad', 'others'], title=f'Model (acc: {accuracy:.4f}, micro F1: {microF1:.4f})')
+
+
 ''' def plot_boxes_2v4(preds_4, preds_2, y_test, ...)
 noised_4 = preds_4.argmax(axis=1) + np.random.uniform(low=-0.3, high=0.3, size=len(X_test))
 noised_2 = preds_2.argmax(axis=1) + np.random.uniform(low=-0.3, high=0.3, size=len(X_test))
