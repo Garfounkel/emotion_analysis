@@ -41,7 +41,7 @@ def get_wrongs(y_proba, targets, texts, emotion=None):
     txt_probas = [str(x) for x in y_proba]
     df = pd.DataFrame({'Predicted': emotions_predicted,
                        'Actual': emotions_targets,
-#                        'Probas': txt_probas,
+                       'Probas': txt_probas,
                        'Text': texts.apply(lambda x: ' '.join(x)),
                       })
 
@@ -51,3 +51,23 @@ def get_wrongs(y_proba, targets, texts, emotion=None):
         wrongs = np.where(y_pred != y_targets)
 
     return df.loc[wrongs]
+
+
+def get_most_wrongs(y_proba, targets, texts, emotion=None):
+    wrong_df = get_wrongs(y_proba, targets, texts, emotion)
+    wrong_df_probas = np.vectorize(lambda x: np.fromstring(x[1:-1], sep=' '), otypes=[object])(wrong_df['Probas'].values)
+    wrong_df_probas = np.asarray([x for x in wrong_df_probas])
+    max_proba = np.apply_along_axis(max, 1, wrong_df_probas)
+    return wrong_df.iloc[max_proba.argsort()]
+
+
+def fix_thresholds(y_pred, proba_preds, threshold=0.64):
+    '''
+    When the classifier is not sure about a prediction (proba < 0.64)
+    we classify it as others since it's the most probable class (according to class repartitions).
+    '''
+    for i, (angry, happy, sad, others) in enumerate(proba_preds):
+        m = max(angry, happy, sad, others)
+        if m < threshold and m != others:
+            y_pred[i] = 3
+    return y_pred
