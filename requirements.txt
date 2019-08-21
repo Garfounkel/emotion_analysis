@@ -6,3 +6,5 @@ gensim
 unidecode
 ekphrasis
 autocorrect
+seaborn
+tensorflow
