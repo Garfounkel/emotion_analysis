@@ -2,7 +2,7 @@
 Emotion analysis of Tweets using Deep Learning. The goal is to classifify each sample into the corresponding emotion class (Sad, Happy, Angry or Others).
 
 ## Publication
-We wrote a short [paper](https://www.aclweb.org/anthology/papers/S/S19/S19-2051/) describing the system we submited to the competition. Please use the following bibtex entry:
+We wrote a short [paper](https://aclanthology.org/S19-2051/) describing the system we submited to the competition ([pdf version here](https://aclanthology.org/S19-2051.pdf)). Please use the following bibtex entry:
 ```
 @inproceedings{rebiai-etal-2019-scia,
     title = "{SCIA} at {S}em{E}val-2019 Task 3: Sentiment Analysis in Textual Conversations Using Deep Learning",
